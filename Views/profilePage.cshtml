@@ -1,0 +1,67 @@
+﻿@using TheAfterLifeCMS.Models
+@using Umbraco.Cms.Core.Services
+@using Umbraco.Cms.Web.Common.Security
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+@inject MemberManager MemberManager
+@inject IMemberService MemberService
+
+@{
+    var current = await MemberManager.GetCurrentMemberAsync();
+}
+
+<h2>Profil</h2>
+
+@if (current == null)
+{
+    <p>Bitte zuerst einloggen.</p>
+    <p><a href="/login">Zum Login</a></p>
+}
+else
+{
+    var m = MemberService.GetByEmail(current.Email);
+
+    var vm = new ProfileViewModel
+    {
+        Name = m?.Name ?? "",
+        Email = m?.Email ?? current.Email ?? "",
+        Phone = m?.GetValue<string>("phone"),
+        Bio = m?.GetValue<string>("bio")
+    };
+
+    if (TempData["success"] != null)
+    {
+        <p style="color:green;">@TempData["success"]</p>
+    }
+
+    <form method="post" action="/profil/save">
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label>Name</label><br />
+            <input name="Name" value="@vm.Name" />
+        </div>
+
+        <div>
+            <label>E-Mail</label><br />
+            <input name="Email" type="email" value="@vm.Email" />
+        </div>
+
+        <div>
+            <label>Telefon</label><br />
+            <input name="Phone" value="@vm.Phone" />
+        </div>
+
+        <div>
+            <label>Bio</label><br />
+            <textarea name="Bio">@vm.Bio</textarea>
+        </div>
+
+        <button type="submit">Speichern</button>
+    </form>
+
+    <form method="post" action="/auth/logout" style="margin-top:20px;">
+        @Html.AntiForgeryToken()
+        <button type="submit">Logout</button>
+    </form>
+}

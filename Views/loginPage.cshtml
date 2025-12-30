@@ -1,0 +1,33 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Login</h2>
+
+@if (TempData["auth_error"] != null)
+{
+    <p style="color:red;">@TempData["auth_error"]</p>
+}
+
+<form method="post" action="/auth/login">
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>E-Mail</label><br />
+        <input name="Email" type="email" />
+    </div>
+
+    <div>
+        <label>Passwort</label><br />
+        <input name="Password" type="password" />
+    </div>
+
+    <div>
+        <label>
+            <input name="RememberMe" type="checkbox" value="true" />
+            Angemeldet bleiben
+        </label>
+    </div>
+
+    <button type="submit">Einloggen</button>
+</form>

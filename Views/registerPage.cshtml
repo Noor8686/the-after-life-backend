@@ -1,0 +1,36 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Registrieren</h2>
+
+@if (TempData["auth_error"] != null)
+{
+    <p style="color:red;">@TempData["auth_error"]</p>
+}
+
+<form method="post" action="/auth/register">
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>Name</label><br />
+        <input name="Name" />
+    </div>
+
+    <div>
+        <label>E-Mail</label><br />
+        <input name="Email" type="email" />
+    </div>
+
+    <div>
+        <label>Passwort</label><br />
+        <input name="Password" type="password" />
+    </div>
+
+    <div>
+        <label>Passwort wiederholen</label><br />
+        <input name="ConfirmPassword" type="password" />
+    </div>
+
+    <button type="submit">Registrieren</button>
+</form>

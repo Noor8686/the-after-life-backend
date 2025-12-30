@@ -1,0 +1,10 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<h2>@Model.Value("seitentitel")</h2>
+
+<div>
+    @Model.Value("inhalt")
+</div>
