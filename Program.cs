@@ -1,6 +1,8 @@
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions; // ✅ WICHTIG
 
+
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // ================================
