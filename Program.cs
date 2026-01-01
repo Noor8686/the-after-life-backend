@@ -1,68 +1,77 @@
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// ✅ API Controller aktivieren
-builder.Services.AddControllers();
-
-// ✅ CORS (Lokal + GitHub Pages)
-builder.Services.AddCors(options =>
+namespace TheAfterLifeCMS
 {
-    options.AddPolicy("Frontend", policy =>
-        policy
-            .WithOrigins(
-                "http://127.0.0.1:5500",
-                "http://localhost:5500",
-                "http://127.0.0.1:5173",
-                "http://localhost:5173",
-                "https://noor8686.github.io"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-    );
-});
-
-// ✅ Umbraco: Stelle sicher, dass AddComposers korrekt verwendet wird
-builder.CreateUmbracoBuilder()
-    .AddBackOffice()  // Umbraco Backoffice für Admin-Oberfläche
-    .AddWebsite()     // Umbraco Website-Konfiguration
-    .Build();         // Baut die Umbraco-Konfiguration
-
-var app = builder.Build();
-
-// ✅ Asynchrone Umbraco-Initialisierung
-await app.BootUmbracoAsync();
-
-// ✅ CORS-Konfiguration vor anderen Middleware
-app.UseCors("Frontend");
-
-// ✅ HTTPS-Weiterleitung aktivieren (wenn notwendig)
-app.UseHttpsRedirection();
-
-// ✅ Statische Dateien aktivieren (falls benötigt)
-app.UseStaticFiles();
-
-// ✅ API Routing aktivieren
-app.UseRouting();
-
-// ✅ API-Controller-Routen aktivieren
-app.MapControllers();
-
-// ✅ Umbraco Middleware und Endpunkte konfigurieren
-app.UseUmbraco()
-    .WithMiddleware(u =>
+    public class Program
     {
-        u.UseBackOffice();  // Backoffice Middleware (Admin-Oberfläche)
-        u.UseWebsite();      // Website Middleware (Frontend)
-    })
-    .WithEndpoints(u =>
-    {
-        u.UseBackOfficeEndpoints();  // Backoffice Endpunkte
-        u.UseWebsiteEndpoints();     // Website Endpunkte
-    });
+        public static async Task Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Anwendung starten
-await app.RunAsync();
+            // API Controller aktivieren
+            builder.Services.AddControllers();
+
+            // CORS (Lokal + GitHub Pages)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Frontend", policy =>
+                    policy
+                        .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
+            });
+
+            // Umbraco spezifische Konfigurationen
+            builder.CreateUmbracoBuilder()
+                .AddBackOffice()
+                .AddWebsite()
+                .Build();
+
+            var app = builder.Build();
+
+            // Asynchrone Umbraco-Initialisierung
+            await app.BootUmbracoAsync();
+
+            // HTTPS-Weiterleitung (nur außerhalb Development)
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+
+            // Statische Dateien
+            app.UseStaticFiles();
+
+            // Routing -> CORS -> Controller-Mapping
+            app.UseRouting();
+            app.UseCors("Frontend");
+
+            // Falls später Authorization benötigt wird
+            app.UseAuthorization();
+
+            // API-Controller-Routen aktivieren
+            app.MapControllers();
+
+            // Umbraco Middleware und Endpunkte konfigurieren
+            app.UseUmbraco()
+                .WithMiddleware(u =>
+                {
+                    u.UseBackOffice();
+                    u.UseWebsite();
+                })
+                .WithEndpoints(u =>
+                {
+                    u.UseBackOfficeEndpoints();
+                    u.UseWebsiteEndpoints();
+                });
+
+            // Anwendung starten (asynchron)
+            await app.RunAsync();
+        }
+    }
+}
