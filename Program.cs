@@ -2,10 +2,14 @@ using Umbraco.Cms.Web.Common.ApplicationBuilder;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ API Controller aktivieren
+// ================================
+// 1️⃣ Services
+// ================================
+
+// API Controller
 builder.Services.AddControllers();
 
-// ✅ CORS (Lokal + GitHub Pages)
+// CORS (lokal + GitHub Pages)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -23,7 +27,9 @@ builder.Services.AddCors(options =>
     );
 });
 
-// ✅ Umbraco
+// ================================
+// 2️⃣ Umbraco
+// ================================
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
@@ -31,19 +37,26 @@ builder.CreateUmbracoBuilder()
 
 var app = builder.Build();
 
+// Umbraco booten
 await app.BootUmbracoAsync();
 
+// ================================
+// 3️⃣ Middleware
+// ================================
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
-
-// ✅ CORS muss vor MapControllers
+// CORS MUSS vor MapControllers
 app.UseCors("Frontend");
 
-// ✅ API Routen aktivieren
+// ================================
+// 4️⃣ API Routen
+// ================================
 app.MapControllers();
 
+// ================================
+// 5️⃣ Umbraco Pipeline
+// ================================
 app.UseUmbraco()
     .WithMiddleware(u =>
     {
