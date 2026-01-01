@@ -1,15 +1,13 @@
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
+using Umbraco.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================================
-// 1️⃣ Services
-// ================================
-
-// API Controller
+// ✅ API Controller aktivieren
 builder.Services.AddControllers();
 
-// CORS (lokal + GitHub Pages)
+// ✅ CORS (Lokal + GitHub Pages)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -27,46 +25,44 @@ builder.Services.AddCors(options =>
     );
 });
 
-// ================================
-// 2️⃣ Umbraco
-// ================================
+// ✅ Umbraco: Stelle sicher, dass AddComposers korrekt verwendet wird
 builder.CreateUmbracoBuilder()
-    .AddBackOffice()
-    .AddWebsite()
-    .Build();
+    .AddBackOffice()  // Umbraco Backoffice für Admin-Oberfläche
+    .AddWebsite()     // Umbraco Website-Konfiguration
+    .Build();         // Baut die Umbraco-Konfiguration
 
 var app = builder.Build();
 
-// Umbraco booten
+// ✅ Asynchrone Umbraco-Initialisierung
 await app.BootUmbracoAsync();
 
-// ================================
-// 3️⃣ Middleware
-// ================================
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-// CORS MUSS vor MapControllers
+// ✅ CORS-Konfiguration vor anderen Middleware
 app.UseCors("Frontend");
 
-// ================================
-// 4️⃣ API Routen
-// ================================
+// ✅ HTTPS-Weiterleitung aktivieren (wenn notwendig)
+app.UseHttpsRedirection();
+
+// ✅ Statische Dateien aktivieren (falls benötigt)
+app.UseStaticFiles();
+
+// ✅ API Routing aktivieren
+app.UseRouting();
+
+// ✅ API-Controller-Routen aktivieren
 app.MapControllers();
 
-// ================================
-// 5️⃣ Umbraco Pipeline
-// ================================
+// ✅ Umbraco Middleware und Endpunkte konfigurieren
 app.UseUmbraco()
     .WithMiddleware(u =>
     {
-        u.UseBackOffice();
-        u.UseWebsite();
+        u.UseBackOffice();  // Backoffice Middleware (Admin-Oberfläche)
+        u.UseWebsite();      // Website Middleware (Frontend)
     })
     .WithEndpoints(u =>
     {
-        u.UseBackOfficeEndpoints();
-        u.UseWebsiteEndpoints();
+        u.UseBackOfficeEndpoints();  // Backoffice Endpunkte
+        u.UseWebsiteEndpoints();     // Website Endpunkte
     });
 
+// ✅ Anwendung starten
 await app.RunAsync();
