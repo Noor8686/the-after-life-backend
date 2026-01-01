@@ -4,13 +4,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CompressionEnabled>false</CompressionEnabled> <!-- Disable compression. E.g. for umbraco backoffice files. These files should be precompressed by node and not let dotnet handle it -->
+    <DisableImplicitProgram>true</DisableImplicitProgram>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="Umbraco.Cms" Version="10.1.0" />
+    <PackageReference Include="Umbraco.Cms" Version="17.0.2" />
     <PackageReference Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="17.0.2" />
-    <PackageReference Include="Umbraco.Cms.Web.Website" Version="17.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +29,18 @@
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
     <RazorCompileOnPublish>false</RazorCompileOnPublish>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Avoid duplicate assembly and razor attributes when Umbraco targets also emit them -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateRazorAssemblyInfo>false</GenerateRazorAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Exclude sibling sample project files to avoid duplicate entry points -->
+    <Compile Remove="TafCms/**" />
+  </ItemGroup>
 
 </Project>
 

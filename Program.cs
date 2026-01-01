@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
-using Microsoft.AspNetCore.Builder;
 
 namespace TheAfterLifeCMS
 {
@@ -13,10 +13,12 @@ namespace TheAfterLifeCMS
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // API Controller aktivieren
+            // Services
             builder.Services.AddControllers();
 
-            // CORS (Lokal + GitHub Pages)
+            // Authorization registrieren (sonst UseAuthorization entfernen)
+            builder.Services.AddAuthorization();
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("Frontend", policy =>
@@ -27,50 +29,43 @@ namespace TheAfterLifeCMS
                         .AllowCredentials());
             });
 
-            // Umbraco spezifische Konfigurationen
             builder.CreateUmbracoBuilder()
-                .AddBackOffice()
-                .AddWebsite()
-                .Build();
+                   .AddBackOffice()
+                   .AddWebsite()
+                   .Build();
 
             var app = builder.Build();
 
-            // Asynchrone Umbraco-Initialisierung
             await app.BootUmbracoAsync();
 
-            // HTTPS-Weiterleitung (nur außerhalb Development)
-            if (!app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
             {
                 app.UseHttpsRedirection();
             }
 
-            // Statische Dateien
             app.UseStaticFiles();
 
-            // Routing -> CORS -> Controller-Mapping
             app.UseRouting();
             app.UseCors("Frontend");
-
-            // Falls später Authorization benötigt wird
             app.UseAuthorization();
-
-            // API-Controller-Routen aktivieren
             app.MapControllers();
 
-            // Umbraco Middleware und Endpunkte konfigurieren
             app.UseUmbraco()
-                .WithMiddleware(u =>
-                {
-                    u.UseBackOffice();
-                    u.UseWebsite();
-                })
-                .WithEndpoints(u =>
-                {
-                    u.UseBackOfficeEndpoints();
-                    u.UseWebsiteEndpoints();
-                });
+               .WithMiddleware(u =>
+               {
+                   u.UseBackOffice();
+                   u.UseWebsite();
+               })
+               .WithEndpoints(u =>
+               {
+                   u.UseBackOfficeEndpoints();
+                   u.UseWebsiteEndpoints();
+               });
 
-            // Anwendung starten (asynchron)
             await app.RunAsync();
         }
     }
