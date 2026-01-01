@@ -4,7 +4,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CompressionEnabled>false</CompressionEnabled> <!-- Disable compression. E.g. for umbraco backoffice files. These files should be precompressed by node and not let dotnet handle it -->
-    <DisableImplicitProgram>true</DisableImplicitProgram>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,11 +35,6 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GenerateRazorAssemblyInfo>false</GenerateRazorAssemblyInfo>
   </PropertyGroup>
-
-  <ItemGroup>
-    <!-- Exclude sibling sample project files to avoid duplicate entry points -->
-    <Compile Remove="TafCms/**" />
-  </ItemGroup>
 
 </Project>
 
